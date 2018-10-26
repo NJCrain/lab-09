@@ -17,6 +17,7 @@ CREATE TABLE weather (
   id SERIAL PRIMARY KEY,
   forecast TEXT,
   time TEXT,
+  created_at BIGINT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );
 
@@ -27,6 +28,7 @@ CREATE TABLE yelp (
   price TEXT,
   rating NUMERIC(3,2),
   url TEXT,
+  created_at BIGINT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );
 
@@ -38,7 +40,8 @@ CREATE TABLE movies (
   total_votes INTEGER,
   image_url TEXT,
   popularity NUMERIC(4,3),
-  released_on TEXT,
+  released_on TEXT,  
+  created_at BIGINT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );
 
@@ -48,6 +51,7 @@ CREATE TABLE meetups (
   name TEXT,
   creation_date TEXT,
   host TEXT,
+  created_at BIGINT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );
 
@@ -63,5 +67,6 @@ CREATE TABLE trails (
   conditions TEXT,
   condition_date TEXT,
   condition_time TEXT,
+  created_at BIGINT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );

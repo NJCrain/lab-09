@@ -128,11 +128,18 @@ function Weather(day) {
 }
 
 Weather.prototype.save = function(id) {
-  const SQL = `INSERT INTO weather (forecast, time, location_id) VALUES ($1, $2, $3);`;
+  const SQL = `INSERT INTO weather (forecast, time, created_at, location_id) VALUES ($1, $2, $3, $4);`;
   const values = Object.values(this);
+  values.push(Date.now());
   values.push(id);
   client.query(SQL, values);
 };
+
+Weather.deleteEntrybyId = function(id) {
+  const SQL = `DELETE FROM weather WHERE location_id=${id};`;
+  client.query(SQL)
+    .catch(error => handleError(error));
+}
 
 Weather.lookup = function(handler) {
   const SQL = `SELECT * FROM weather WHERE location_id=$1;`;
@@ -140,8 +147,16 @@ Weather.lookup = function(handler) {
     .then(result => {
       if (result.rowCount > 0) {
         console.log('Got Data from SQL');
-        handler.cacheHit(result);
-      } else {
+        let currentAge = (Date.now() - result.rows[0].created_at) / (1000 * 60);
+        if (result.rowCount > 0 && currentAge > 10) {
+          console.log('Data was too old');
+          Weather.deleteEntrybyId(handler.location.id);
+          handler.cacheMiss();
+        }else {
+          handler.cacheHit(result);
+        }
+      }
+      else {
         console.log('got data from API');
         handler.cacheMiss();
       }
@@ -195,20 +210,35 @@ function Yelp(data) {
 }
 
 Yelp.prototype.save = function(id) {
-  const SQL = `INSERT INTO yelp (name, image_url, price, rating, url, location_id) VALUES ($1, $2, $3, $4, $5, $6);`;
+  const SQL = `INSERT INTO yelp (name, image_url, price, rating, url, created_at, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
   const value = Object.values(this);
+  value.push(Date.now());
   value.push(id);
   client.query(SQL, value);
+}
+
+Yelp.deleteEntrybyId = function(id) {
+  const SQL = `DELETE FROM weather WHERE location_id=${id};`;
+  client.query(SQL)
+    .catch(error => handleError(error));
 }
 
 Yelp.lookup = function(handler) {
   const SQL = `SELECT * FROM yelp WHERE location_id=$1;`;
   client.query(SQL, [handler.location.id])
     .then(result => {
-      if (result.rowCount >0 ){
-        console.log('Got from SQL')
-        handler.cacheHit(result);
-      } else {
+      if (result.rowCount > 0) {
+        console.log('Got Data from SQL');
+        let currentAge = (Date.now() - result.rows[0].created_at) / (1000 * 60);
+        if (result.rowCount > 0 && currentAge > 10) {
+          console.log('Data was too old');
+          Yelp.deleteEntrybyId(handler.location.id);
+          handler.cacheMiss();
+        }else {
+          handler.cacheHit(result);
+        }
+      }
+      else {
         console.log('got data from API');
         handler.cacheMiss();
       }
@@ -269,20 +299,35 @@ function Movie(data) {
 
 
 Movie.prototype.save = function(id) {
-  const SQL = `INSERT INTO movies (title, overview, average_votes, total_votes, image_url, popularity, released_on, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`;
+  const SQL = `INSERT INTO movies (title, overview, average_votes, total_votes, image_url, popularity, released_on, created_at, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
   const value = Object.values(this);
+  value.push(Date.now());
   value.push(id);
   client.query(SQL, value);
+}
+
+Movie.deleteEntrybyId = function(id) {
+  const SQL = `DELETE FROM weather WHERE location_id=${id};`;
+  client.query(SQL)
+    .catch(error => handleError(error));
 }
 
 Movie.lookup = function(handler) {
   const SQL = `SELECT * FROM movies WHERE location_id=$1;`;
   client.query(SQL, [handler.location.id])
     .then(result => {
-      if (result.rowCount >0 ){
-        console.log('Got data from SQL')
-        handler.cacheHit(result);
-      } else {
+      if (result.rowCount > 0) {
+        console.log('Got Data from SQL');
+        let currentAge = (Date.now() - result.rows[0].created_at) / (1000 * 60);
+        if (result.rowCount > 0 && currentAge > 10) {
+          console.log('Data was too old');
+          Movie.deleteEntrybyId(handler.location.id);
+          handler.cacheMiss();
+        }else {
+          handler.cacheHit(result);
+        }
+      }
+      else {
         console.log('got data from API');
         handler.cacheMiss();
       }
@@ -338,20 +383,35 @@ function Meetup(data) {
 
 
 Meetup.prototype.save = function(id) {
-  const SQL = `INSERT INTO meetups (link, name, creation_date, host, location_id) VALUES ($1, $2, $3, $4, $5);`;
+  const SQL = `INSERT INTO meetups (link, name, creation_date, host, created_at, location_id) VALUES ($1, $2, $3, $4, $5, $6);`;
   const value = Object.values(this);
+  value.push(Date.now());
   value.push(id);
   client.query(SQL, value);
+}
+
+Meetup.deleteEntrybyId = function(id) {
+  const SQL = `DELETE FROM weather WHERE location_id=${id};`;
+  client.query(SQL)
+    .catch(error => handleError(error));
 }
 
 Meetup.lookup = function(handler) {
   const SQL = `SELECT * FROM meetups WHERE location_id=$1;`;
   client.query(SQL, [handler.location.id])
     .then(result => {
-      if (result.rowCount >0 ){
-        console.log('Got data from SQL')
-        handler.cacheHit(result);
-      } else {
+      if (result.rowCount > 0) {
+        console.log('Got Data from SQL');
+        let currentAge = (Date.now() - result.rows[0].created_at) / (1000 * 60);
+        if (result.rowCount > 0 && currentAge > 10) {
+          console.log('Data was too old');
+          Meetup.deleteEntrybyId(handler.location.id);
+          handler.cacheMiss();
+        }else {
+          handler.cacheHit(result);
+        }
+      }
+      else {
         console.log('got data from API');
         handler.cacheMiss();
       }
@@ -411,20 +471,35 @@ function Trail(data) {
 
 
 Trail.prototype.save = function(id) {
-  const SQL = `INSERT INTO trails (name, location, length, stars, star_votes, summary, trail_url, conditions, condition_date, condition_time, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
+  const SQL = `INSERT INTO trails (name, location, length, stars, star_votes, summary, trail_url, conditions, condition_date, condition_time, created_at, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`;
   const value = Object.values(this);
+  value.push(Date.now());
   value.push(id);
   client.query(SQL, value);
+}
+
+Trail.deleteEntrybyId = function(id) {
+  const SQL = `DELETE FROM weather WHERE location_id=${id};`;
+  client.query(SQL)
+    .catch(error => handleError(error));
 }
 
 Trail.lookup = function(handler) {
   const SQL = `SELECT * FROM trails WHERE location_id=$1;`;
   client.query(SQL, [handler.location.id])
     .then(result => {
-      if (result.rowCount >0 ){
-        console.log('Got data from SQL')
-        handler.cacheHit(result);
-      } else {
+      if (result.rowCount > 0) {
+        console.log('Got Data from SQL');
+        let currentAge = (Date.now() - result.rows[0].created_at) / (1000 * 60);
+        if (result.rowCount > 0 && currentAge > 10) {
+          console.log('Data was too old');
+          Trail.deleteEntrybyId(handler.location.id);
+          handler.cacheMiss();
+        }else {
+          handler.cacheHit(result);
+        }
+      }
+      else {
         console.log('got data from API');
         handler.cacheMiss();
       }
