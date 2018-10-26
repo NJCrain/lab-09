@@ -21,7 +21,7 @@ app.get('/weather', searchWeatherData);
 app.get('/yelp', getYelp);
 app.get('/movies', getMovies);
 app.get('/meetups', getMeetups);
-// app.get('trails', getTrails);
+app.get('/trails', getTrails);
 
 app.get('/location', searchToLatLong);
 
@@ -370,6 +370,80 @@ Meetup.fetch = function(location) {
         return summary;
       });
       return meetupSummaries;
+    })
+    .catch(error => handleError(error));
+};
+
+
+//--------------------------------------------------TRAILS------------------------------------------------
+
+function getTrails(req, res) {
+
+  const handler = {
+    location: req.query.data,
+
+    cacheHit: function(result) {
+      res.send(result.rows);
+    },
+
+    cacheMiss: function() {
+      Trail.fetch(req.query.data)
+        .then(result => res.send(result))
+        .catch(console.error);
+    },
+  };
+
+  Trail.lookup(handler);
+}
+
+function Trail(data) {
+  this.name = data.name;
+  this.location = data.location;
+  this.length = data.length;
+  this.stars = data.stars;
+  this.star_votes = data.starVotes;
+  this.summary = data.summary;
+  this.trail_url = data.url;
+  this.conditions = data.conditionStatus
+  this.condition_date = new Date(data.conditionDate).toDateString();
+  this.condition_time = new Date(data.conditionDate).toTimeString().slice(0, 8);
+}
+
+
+Trail.prototype.save = function(id) {
+  const SQL = `INSERT INTO trails (name, location, length, stars, star_votes, summary, trail_url, conditions, condition_date, condition_time, location_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
+  const value = Object.values(this);
+  value.push(id);
+  client.query(SQL, value);
+}
+
+Trail.lookup = function(handler) {
+  const SQL = `SELECT * FROM trails WHERE location_id=$1;`;
+  client.query(SQL, [handler.location.id])
+    .then(result => {
+      if (result.rowCount >0 ){
+        console.log('Got data from SQL')
+        handler.cacheHit(result);
+      } else {
+        console.log('got data from API');
+        handler.cacheMiss();
+      }
+    })
+    .catch(error => handleError(error));
+};
+
+Trail.fetch = function(location) {
+  const URL = `https://www.hikingproject.com/data/get-trails?key=${process.env.TRAILS_API_KEY}&lat=${location.latitude}&lon=${location.longitude}`;
+
+  return superagent.get(URL)
+    .then(result => {
+      // return result.body;
+      const trailSummaries = result.body.trails.map(trail => {
+        const summary = new Trail(trail);
+        summary.save(location.id);
+        return summary;
+      });
+      return trailSummaries;
     })
     .catch(error => handleError(error));
 };
