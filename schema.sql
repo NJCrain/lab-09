@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS weather;
 DROP TABLE IF EXISTS yelp;
 DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS meetups;
 DROP TABLE IF EXISTS locations;
 
 CREATE TABLE locations (
@@ -37,5 +38,14 @@ CREATE TABLE movies (
   image_url VARCHAR(255),
   popularity NUMERIC(4,3),
   released_on VARCHAR(255),
+  location_id INTEGER NOT NULL REFERENCES locations(id)
+);
+
+CREATE TABLE meetups (
+  id SERIAL PRIMARY KEY,
+  link VARCHAR(255),
+  name TEXT,
+  creation_date TEXT,
+  host TEXT,
   location_id INTEGER NOT NULL REFERENCES locations(id)
 );
